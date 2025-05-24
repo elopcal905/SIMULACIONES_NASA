@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación: Tus Decisiones Saludables</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #F7FFF7; /* Fondo Menta Muy Claro */
+            color: #1A535C; /* Texto Principal Verde Azulado Oscuro */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+            transition: background-color 0.5s ease;
+        }
+        .container {
+            background-color: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(26, 83, 92, 0.15); /* Sombra con color #1A535C */
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #FF6B6B; /* Primario Coral */
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: #57757A; /* Texto Secundario Gris Suave */
+            margin-bottom: 2rem;
+        }
+        .scenario-text {
+            font-size: 1.1rem;
+            color: #1A535C;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            min-height: 100px; /* Para evitar saltos de altura */
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            background-color: #4ECDC4; /* Secundario Turquesa */
+            color: white;
+            font-weight: 700;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .option-button:hover {
+            background-color: #45B7AA; /* Turquesa más oscuro */
+            transform: translateY(-2px);
+        }
+        .feedback-area {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            min-height: 120px; /* Para evitar saltos de altura */
+        }
+        .feedback-good {
+            background-color: #E6FFFA; /* Menta muy claro, casi blanco */
+            border: 2px solid #4ECDC4; /* Turquesa */
+            color: #1A535C;
+        }
+        .feedback-average {
+            background-color: #FFFBEB; /* Amarillo muy claro */
+            border: 2px solid #FFD166; /* Amarillo Sol */
+            color: #1A535C;
+        }
+        .feedback-poor {
+            background-color: #FFF5F5; /* Rosa muy claro */
+            border: 2px solid #FF6B6B; /* Coral */
+            color: #1A535C;
+        }
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FF6B6B;
+            margin-top: 1rem;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #E0E0E0;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 20px;
+            width: 0%; /* Se actualizará con JS */
+            background-color: #FFD166; /* Amarillo Sol */
+            border-radius: 0.5rem;
+            transition: width 0.5s ease-in-out;
+            text-align: center;
+            line-height: 20px;
+            font-size: 0.8rem;
+            color: #1A535C;
+            font-weight: bold;
+        }
+        .start-button, .next-button, .restart-button {
+            background-color: #FF6B6B; /* Primario Coral */
+            color: white;
+            font-weight: 900;
+            font-size: 1.1rem;
+            padding: 0.8rem 2rem;
+            border-radius: 2rem;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
+        }
+        .start-button:hover, .next-button:hover, .restart-button:hover {
+            background-color: #E55A5A; /* Coral más oscuro */
+            transform: translateY(-2px);
+        }
+        .final-message {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            color: #1A535C;
+        }
+        /* Ocultar elementos por defecto */
+        #scenarioScreen, #finalScreen {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="startScreen">
+            <img src="https://placehold.co/150x150/FFD166/1A535C?text=🍎&font=Nunito" alt="[Image of Icono de Manzana]" class="mx-auto mb-6 rounded-full" onerror="this.src='https://placehold.co/150x150/CCCCCC/FFFFFF?text=Error+Imagen'">
+            <h1 class="title">¡Tus Decisiones Saludables!</h1>
+            <p class="subtitle">Enfrenta situaciones diarias y elige la mejor opción para tu salud, aplicando lo que aprendiste en el curso "Potencia Tu Salud con la Comida".</p>
+            <button id="startButton" class="start-button">¡Empezar Simulación!</button>
+        </div>
+
+        <div id="scenarioScreen">
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar">0%</div>
+            </div>
+            <h2 id="scenarioTitle" class="text-xl font-bold text-turquesa mb-3">Escenario X</h2>
+            <p id="scenarioText" class="scenario-text">Aquí va la descripción del escenario...</p>
+            <div id="optionsContainer">
+                </div>
+            <div id="feedbackArea" class="feedback-area" style="display: none;">
+                </div>
+            <div id="scoreArea" class="score-display" style="display: none;">Puntuación: 0</div>
+            <button id="nextButton" class="next-button" style="display: none;">Siguiente Escenario</button>
+        </div>
+
+        <div id="finalScreen">
+            <img src="https://placehold.co/150x150/4ECDC4/FFFFFF?text=🏆&font=Nunito" alt="[Image of Icono de Trofeo]" class="mx-auto mb-6 rounded-full" onerror="this.src='https://placehold.co/150x150/CCCCCC/FFFFFF?text=Error+Imagen'">
+            <h1 class="title">¡Simulación Completada!</h1>
+            <p class="subtitle">Este es un resumen de tu desempeño:</p>
+            <div id="finalScore" class="text-3xl font-black text-amarillo-sol mb-4">Puntuación Final: 0</div>
+            <p id="finalMessage" class="final-message">Mensaje final basado en la puntuación.</p>
+            <button id="restartButton" class="restart-button">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                title: "Escenario 1: El Desayuno Rápido",
+                text: "Te has levantado tarde y tienes solo 5 minutos para desayunar antes de ir al instituto. En la cocina ves varias opciones. ¿Qué eliges?",
+                options: [
+                    { text: "Un tazón de cereales azucarados con leche.", points: 0, feedback: "Los cereales muy azucarados te dan un subidón de energía rápido, pero luego te sentirás cansad@ pronto. Busca opciones con menos azúcar y más fibra para energía duradera." },
+                    { text: "Una manzana y un yogur natural.", points: 10, feedback: "¡Excelente elección! La fruta te da vitaminas y fibra, y el yogur natural proteínas. Un desayuno equilibrado para empezar el día con energía." },
+                    { text: "Un paquete de galletas de chocolate.", points: 0, feedback: "Las galletas de chocolate suelen tener mucho azúcar y grasas poco saludables. Te darán energía momentánea, pero no son la mejor opción para un desayuno nutritivo." },
+                    { text: "Nada, ya comeré algo en el recreo.", points: 0, feedback: "Saltarse el desayuno puede hacer que te sientas cansad@ y sin concentración en clase. ¡Es la comida más importante para arrancar el día!" }
+                ]
+            },
+            {
+                title: "Escenario 2: La Merienda Post-Clase",
+                text: "Sales del instituto con mucha hambre. Pasas por una tienda de camino a casa. ¿Qué compras para merendar?",
+                options: [
+                    { text: "Una bolsa de patatas fritas y un refresco.", points: 0, feedback: "Las patatas fritas de bolsa suelen tener mucha grasa y sal, y los refrescos mucho azúcar. No es la merienda más nutritiva para reponer energías." },
+                    { text: "Un bocadillo pequeño de pan integral con pavo y tomate.", points: 10, feedback: "¡Muy buena opción! El pan integral aporta fibra, el pavo proteínas y el tomate vitaminas. Una merienda completa y saludable." },
+                    { text: "Una chocolatina grande.", points: 0, feedback: "Las chocolatinas grandes aportan muchas calorías, azúcar y grasas. Mejor optar por algo más nutritivo para calmar el hambre de forma saludable." },
+                    { text: "Un puñado de frutos secos (nueces/almendras) y una botella de agua.", points: 10, feedback: "¡Estupendo! Los frutos secos te dan energía, grasas saludables y fibra. Y el agua es la mejor forma de hidratarte." }
+                ]
+            },
+            {
+                title: "Escenario 3: Eligiendo Cereales",
+                text: "Estás en el supermercado ayudando con la compra. Necesitas elegir cereales para el desayuno. Hay dos opciones principales en la estantería:",
+                options: [
+                    { text: "Cereales 'Choco-Boom' (Ingredientes: Azúcar, Harina refinada... Azúcares: 30g/100g. Fibra: 2g/100g).", points: 0, feedback: "Estos cereales tienen mucho azúcar y poca fibra. Fíjate en la lista de ingredientes: si el azúcar está entre los primeros, ¡cuidado! Busca opciones con más fibra y menos azúcar." },
+                    { text: "Cereales 'Avena Vital' (Ingredientes: Copos de avena integral, Frutos secos... Azúcares: 5g/100g. Fibra: 10g/100g).", points: 10, feedback: "¡Elección inteligente! Estos cereales son ricos en fibra gracias a la avena integral y tienen mucho menos azúcar. ¡Perfectos para un desayuno nutritivo!" }
+                ]
+            },
+            {
+                title: "Escenario 4: Fiesta de Cumpleaños",
+                text: "Estás en una fiesta de cumpleaños. Hay pizza, sándwiches, patatas fritas, refrescos... pero también una bandeja con palitos de zanahoria y pepino con hummus, y brochetas de fruta. ¿Cómo armas tu plato?",
+                options: [
+                    { text: "Solo pizza y refrescos, ¡es una fiesta y hay que disfrutar!", points: 0, feedback: "Disfrutar está bien, pero llenarse solo de opciones menos saludables puede hacerte sentir pesado después. ¡El equilibrio es la clave!" },
+                    { text: "Un poco de todo, intentando que la mitad de mi plato sean las opciones más saludables (verduras, fruta).", points: 10, feedback: "¡Así se hace! Disfrutas de la fiesta probando un poco de todo, pero priorizando también las opciones nutritivas. ¡El equilibrio es perfecto!" },
+                    { text: "Solo las opciones saludables (verduras, fruta), no quiero pasarme.", points: 5, feedback: "Es una buena opción ser consciente, pero recuerda que en una fiesta también se puede disfrutar de otras cosas con moderación. ¡No te restrinjas demasiado si no quieres!" }
+                ]
+            },
+            {
+                title: "Escenario 5: Sed Post-Deporte",
+                text: "Acabas de tener una intensa clase de educación física y tienes muchísima sed. ¿Qué bebida eliges de la máquina expendedora?",
+                options: [
+                    { text: "Una bebida energética 'Turbo-Boost'.", points: 0, feedback: "Las bebidas energéticas suelen tener mucho azúcar y estimulantes que no son recomendables para tu edad, especialmente después del deporte. El agua es mucho mejor." },
+                    { text: "Un zumo de frutas envasado.", points: 5, feedback: "Aunque parece saludable, los zumos envasados suelen tener bastante azúcar (a veces tanto como un refresco) y menos fibra que la fruta entera. El agua sigue siendo la mejor opción para la sed." },
+                    { text: "Agua.", points: 10, feedback: "¡La mejor elección posible! El agua es lo que tu cuerpo necesita para rehidratarse después del ejercicio, sin azúcares ni calorías extra." },
+                    { text: "Un refresco con gas.", points: 0, feedback: "Los refrescos tienen mucho azúcar y no hidratan tan bien como el agua. Además, el gas puede resultar incómodo después de hacer deporte." }
+                ]
+            }
+        ];
+
+        let currentScenarioIndex = 0;
+        let score = 0;
+
+        const startScreen = document.getElementById('startScreen');
+        const scenarioScreen = document.getElementById('scenarioScreen');
+        const finalScreen = document.getElementById('finalScreen');
+
+        const startButton = document.getElementById('startButton');
+        const nextButton = document.getElementById('nextButton');
+        const restartButton = document.getElementById('restartButton');
+
+        const scenarioTitleElement = document.getElementById('scenarioTitle');
+        const scenarioTextElement = document.getElementById('scenarioText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackArea = document.getElementById('feedbackArea');
+        const scoreArea = document.getElementById('scoreArea');
+        const finalScoreElement = document.getElementById('finalScore');
+        const finalMessageElement = document.getElementById('finalMessage');
+        const progressBar = document.getElementById('progressBar');
+
+        startButton.addEventListener('click', startGame);
+        nextButton.addEventListener('click', nextScenario);
+        restartButton.addEventListener('click', startGame);
+
+        function startGame() {
+            currentScenarioIndex = 0;
+            score = 0;
+            startScreen.style.display = 'none';
+            finalScreen.style.display = 'none';
+            scenarioScreen.style.display = 'block';
+            nextButton.style.display = 'none';
+            feedbackArea.style.display = 'none';
+            scoreArea.style.display = 'none';
+            loadScenario();
+        }
+
+        function updateProgressBar() {
+            const progressPercentage = ((currentScenarioIndex + 1) / scenarios.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressBar.textContent = `${Math.round(progressPercentage)}%`;
+        }
+
+        function loadScenario() {
+            updateProgressBar();
+            const currentScenario = scenarios[currentScenarioIndex];
+            scenarioTitleElement.textContent = currentScenario.title;
+            scenarioTextElement.textContent = currentScenario.text;
+            optionsContainer.innerHTML = ''; // Limpiar opciones anteriores
+
+            currentScenario.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.classList.add('option-button');
+                button.addEventListener('click', () => selectOption(option));
+                optionsContainer.appendChild(button);
+            });
+            feedbackArea.style.display = 'none';
+            nextButton.style.display = 'none';
+            scoreArea.style.display = 'block';
+            scoreArea.textContent = `Puntuación: ${score}`;
+        }
+
+        function selectOption(option) {
+            score += option.points;
+            feedbackArea.textContent = option.feedback;
+            feedbackArea.className = 'feedback-area'; // Reset classes
+
+            if (option.points === 10) {
+                feedbackArea.classList.add('feedback-good');
+            } else if (option.points === 5) {
+                feedbackArea.classList.add('feedback-average');
+            } else {
+                feedbackArea.classList.add('feedback-poor');
+            }
+
+            feedbackArea.style.display = 'block';
+            scoreArea.textContent = `Puntuación: ${score}`;
+            
+            // Deshabilitar botones de opción después de seleccionar una
+            const optionButtons = optionsContainer.querySelectorAll('.option-button');
+            optionButtons.forEach(btn => btn.disabled = true);
+
+            nextButton.style.display = 'inline-block';
+        }
+
+        function nextScenario() {
+            currentScenarioIndex++;
+            if (currentScenarioIndex < scenarios.length) {
+                loadScenario();
+                 // Reactivar botones de opción
+                const optionButtons = optionsContainer.querySelectorAll('.option-button');
+                optionButtons.forEach(btn => btn.disabled = false);
+            } else {
+                showFinalScreen();
+            }
+        }
+
+        function showFinalScreen() {
+            scenarioScreen.style.display = 'none';
+            finalScreen.style.display = 'block';
+            finalScoreElement.textContent = `Puntuación Final: ${score}`;
+
+            let message = "";
+            if (score >= 40) {
+                message = "¡Felicidades! Eres un/a expert@ en decisiones saludables. ¡Sigue así y potencia tu salud cada día!";
+                finalScoreElement.style.color = '#4ECDC4'; // Turquesa
+            } else if (score >= 25) {
+                message = "¡Buen trabajo! Has tomado varias decisiones saludables. Sigue practicando y aprendiendo para mejorar aún más.";
+                finalScoreElement.style.color = '#FFD166'; // Amarillo Sol
+            } else {
+                message = "Has dado los primeros pasos. ¡No te desanimes! Repasa el curso y vuelve a intentarlo. ¡Cada decisión es una oportunidad para aprender!";
+                finalScoreElement.style.color = '#FF6B6B'; // Coral
+            }
+            finalMessageElement.textContent = message;
+        }
+
+        // Iniciar (opcional, si quieres que empiece directamente sin pantalla de inicio)
+        // startGame(); 
+    </script>
+</body>
+</html>
+
